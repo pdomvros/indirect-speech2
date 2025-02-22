@@ -76,9 +76,11 @@
     hr {
       border: 1px solid #444;
     }
+    /* Για την εκτύπωση, κρύβουμε τα πλήκτρα */
+    @media print {
+      .sidebar { display: none; }
+    }
   </style>
-  <!-- jsPDF βιβλιοθήκη για εκτύπωση σε PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <header>
@@ -398,7 +400,7 @@
       const questionContainer = document.getElementById('questionContainer');
       const question = questions[currentQuestionIndex];
       
-      // Ανακατέβουμε τις επιλογές (αντίγραφο του πίνακα)
+      // Ανακατεύουμε τις επιλογές (δημιουργώντας αντίγραφο του πίνακα)
       currentShuffledOptions = shuffle(question.options.slice());
       
       let html = `<p><strong>${question.direct}</strong></p>`;
@@ -426,7 +428,7 @@
 
       const option = currentShuffledOptions[selectedOption];
 
-      // Αναπαραγωγή ήχου
+      // Αναπαραγωγή ήχου για σωστή ή λανθασμένη απάντηση
       if(option.isCorrect) {
         new Audio('success-sound.mp3').play();
         feedbackDiv.textContent = option.feedback + " 😃";
@@ -453,7 +455,7 @@
       updateScore();
     }
 
-    // Επόμενη ερώτηση ή τελικά αποτελέσματα
+    // Επόμενη ερώτηση ή εμφάνιση τελικών αποτελεσμάτων
     function nextQuestion() {
       currentQuestionIndex++;
       if (currentQuestionIndex < questions.length) {
@@ -463,12 +465,12 @@
       }
     }
 
-    // Ενημέρωση σκορ
+    // Ενημέρωση του σκορ
     function updateScore() {
       document.getElementById('scoreBox').textContent = "Σκορ: " + score;
     }
 
-    // Εμφάνιση αποτελεσμάτων και ανασκόπησης (παραμένει στην οθόνη)
+    // Εμφάνιση τελικών αποτελεσμάτων και ανασκόπησης (που παραμένει στην οθόνη για εκτύπωση)
     function showResults() {
       document.getElementById('questionContainer').innerHTML = `<h2>Τέλος Ασκήσεων!</h2><p>Το τελικό σκορ σας είναι: ${score} από ${questions.length} 😎</p>`;
       document.getElementById('nextButton').style.display = 'none';
@@ -494,20 +496,9 @@
       document.getElementById('resultContainer').style.display = 'block';
     }
 
-    // Εκτύπωση σε PDF με χρήση jsPDF – χρησιμοποιείται το doc.html() για αποτύπωση του περιεχομένου της ανασκόπησης
+    // Εκτύπωση σε PDF χρησιμοποιώντας window.print() (ανοίγει τον διάλογο εκτύπωσης του browser)
     function printPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      // Εδώ μπορείτε να ενσωματώσετε γραμματοσειρά που υποστηρίζει ελληνικά αν το χρειαστεί (π.χ. μέσω addFileToVFS και addFont)
-      doc.html(document.getElementById('resultContainer'), {
-        callback: function(doc) {
-          doc.save('Απαντήσεις_και_Ανατροφοδότηση.pdf');
-        },
-        x: 10,
-        y: 10,
-        width: 190
-      });
+      window.print();
     }
 
     // Επανέναρξη της άσκησης
@@ -520,7 +511,7 @@
       loadQuestion();
     }
 
-    // Φόρτωση πρώτης ερώτησης κατά το φόρτωμα της σελίδας
+    // Φόρτωση της πρώτης ερώτησης κατά το φόρτωμα της σελίδας
     window.onload = function() {
       loadQuestion();
     }
