@@ -77,7 +77,7 @@
       border: 1px solid #444;
     }
   </style>
-  <!-- jsPDF βιβλιοθήκη -->
+  <!-- jsPDF βιβλιοθήκη για εκτύπωση σε PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
@@ -93,21 +93,30 @@
     </div>
     <div class="sidebar">
       <div id="scoreBox">Σκορ: 0</div>
-      <button id="nextButton" onclick="nextQuestion()" style="display: none;">Επόμενη Ερώτηση</button>
-      <button id="printButton" onclick="printPDF()">Εκτύπωση σε PDF</button>
+      <button id="nextButton" onclick="nextQuestion()" style="display: none;">Επόμενη Ερώτηση ▶️</button>
+      <button id="printButton" onclick="printPDF()">Εκτύπωση σε PDF 🖨️</button>
     </div>
   </div>
   <!-- Περιοχή ανασκόπησης απαντήσεων στο τέλος -->
   <div id="resultContainer" class="question-container" style="display: none; margin-top:20px;">
-    <h2>Απαντήσεις και Ανατροφοδότηση</h2>
+    <h2>Απαντήσεις και Ανατροφοδότηση 📋</h2>
     <div id="review"></div>
   </div>
 
   <script>
+    // Βοηθητική συνάρτηση για ανακατέμα: Fisher-Yates shuffle
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
     // Πίνακας 30 ερωτήσεων
     const questions = [
       {
-        direct: "Θα σου τηλεφωνήσω.",
+        direct: "❓ Θα σου τηλεφωνήσω.",
         options: [
           { text: "Είπε ότι θα σου τηλεφωνήσει.", isCorrect: true, feedback: "Σωστά! Η αλλαγή του ρήματος αντανακλά τη μετάβαση από ευθύ σε πλάγιο λόγο." },
           { text: "Είπε ότι θα με τηλεφωνήσει.", isCorrect: false, feedback: "Λάθος επιλογή. Ελέγξτε την αλλαγή του προσώπου." },
@@ -116,7 +125,7 @@
         ]
       },
       {
-        direct: "Είναι αδύνατο να μείνω μαζί σου.",
+        direct: "❓ Είναι αδύνατο να μείνω μαζί σου.",
         options: [
           { text: "Της έλεγε ότι ήταν αδύνατο να μείνει μαζί της.", isCorrect: true, feedback: "Σωστά! Η αλλαγή στο ρήμα και το πρόσωπο είναι ορθή." },
           { text: "Της είπε ότι είναι αδύνατο να μείνει μαζί σου.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος του ρήματος δεν μετατράπηκε σωστά." },
@@ -125,7 +134,7 @@
         ]
       },
       {
-        direct: "Αύριο το σχολείο θα πάει εκδρομή.",
+        direct: "❓ Αύριο το σχολείο θα πάει εκδρομή.",
         options: [
           { text: "Ο διευθυντής ανακοίνωσε ότι την επόμενη μέρα το σχολείο θα πάει εκδρομή.", isCorrect: true, feedback: "Σωστά! Το χρονικό επιρρήμα μετατράπηκε σωστά." },
           { text: "Ο διευθυντής είπε ότι αύριο το σχολείο θα πάει εκδρομή.", isCorrect: false, feedback: "Λάθος επιλογή. Η αλλαγή του χρονικού επιρρήματος λείπει." },
@@ -134,7 +143,7 @@
         ]
       },
       {
-        direct: "Φύγε!",
+        direct: "❓ Φύγε!",
         options: [
           { text: "Την παρακίνησε να φύγει.", isCorrect: true, feedback: "Σωστά! Η προστακτική μετατράπηκε σωστά σε υποτακτική." },
           { text: "Την είπε να φύγει.", isCorrect: false, feedback: "Λάθος επιλογή. Η μετάβαση δεν αντικατοπτρίζει πλήρως την προστακτική." },
@@ -143,7 +152,7 @@
         ]
       },
       {
-        direct: "Θέλω να φύγω μαζί σου.",
+        direct: "❓ Θέλω να φύγω μαζί σου.",
         options: [
           { text: "Λέει ότι θέλει να φύγει μαζί της.", isCorrect: true, feedback: "Σωστά! Η αλλαγή του προσώπου και του χρόνου είναι ορθή." },
           { text: "Λέει ότι θέλει να φύγει μαζί σου.", isCorrect: false, feedback: "Λάθος επιλογή. Η αλλαγή του προσώπου δεν πραγματοποιήθηκε." },
@@ -152,7 +161,7 @@
         ]
       },
       {
-        direct: "Δεν φοβάμαι τίποτε.",
+        direct: "❓ Δεν φοβάμαι τίποτε.",
         options: [
           { text: "Είπε πως δε φοβόταν τίποτα.", isCorrect: true, feedback: "Σωστά! Ο χρόνος του ρήματος μετατράπηκε σωστά." },
           { text: "Είπε πως δεν φοβάται τίποτα.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος του ρήματος πρέπει να αλλάξει." },
@@ -161,7 +170,7 @@
         ]
       },
       {
-        direct: "Πάρε την απόφασή σου.",
+        direct: "❓ Πάρε την απόφασή σου.",
         options: [
           { text: "Της είπε να πάρει την απόφασή της.", isCorrect: true, feedback: "Σωστά! Η εντολή μετατράπηκε σωστά σε δευτερεύουσα πρόταση." },
           { text: "Της είπε να πάρει την απόφασή σου.", isCorrect: false, feedback: "Λάθος επιλογή. Ελέγξτε την αλλαγή του προσώπου." },
@@ -170,7 +179,7 @@
         ]
       },
       {
-        direct: "Μη δίνεις σημασία.",
+        direct: "❓ Μη δίνεις σημασία.",
         options: [
           { text: "Με προέτρεψε να μη δίνω σημασία.", isCorrect: true, feedback: "Σωστά! Η μετάβαση από προστακτική σε βουλητική ολοκληρώθηκε ορθά." },
           { text: "Είπε να μην δίνω σημασία.", isCorrect: false, feedback: "Λάθος επιλογή. Δοκιμάστε ξανά." },
@@ -179,7 +188,7 @@
         ]
       },
       {
-        direct: "Έλα εδώ τώρα.",
+        direct: "❓ Έλα εδώ τώρα.",
         options: [
           { text: "Της είπε να έρθει εκεί αμέσως.", isCorrect: true, feedback: "Σωστά! Η προστακτική μετατράπηκε σωστά σε υποτακτική." },
           { text: "Της είπε να έρθει εδώ τώρα.", isCorrect: false, feedback: "Λάθος επιλογή. Ελέγξτε τη χρήση του επιρρήματος." },
@@ -188,7 +197,7 @@
         ]
       },
       {
-        direct: "Σου υπόσχομαι ότι θα είμαι εκεί.",
+        direct: "❓ Σου υπόσχομαι ότι θα είμαι εκεί.",
         options: [
           { text: "Υποσχέθηκε ότι θα ήταν εκεί.", isCorrect: true, feedback: "Σωστά! Ο μέλλοντας έχει προσαρμοστεί σωστά." },
           { text: "Υποσχέθηκε ότι είναι εκεί.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει." },
@@ -197,7 +206,7 @@
         ]
       },
       {
-        direct: "Δεν θα αργήσω.",
+        direct: "❓ Δεν θα αργήσω.",
         options: [
           { text: "Της είπε ότι δεν θα άργιζε.", isCorrect: true, feedback: "Σωστά! Η μετάβαση έγινε ορθή." },
           { text: "Είπε ότι δεν αργεί.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος πρέπει να αλλάξει." },
@@ -206,7 +215,7 @@
         ]
       },
       {
-        direct: "Θα μας επισκεφθεί ο καθηγητής.",
+        direct: "❓ Θα μας επισκεφθεί ο καθηγητής.",
         options: [
           { text: "Ανακοίνωσε ότι ο καθηγητής θα τους επισκεπτόταν.", isCorrect: true, feedback: "Σωστά! Η χρήση του παρατατικού είναι ορθή." },
           { text: "Είπε ότι ο καθηγητής θα τους επισκεπτόταν.", isCorrect: false, feedback: "Λάθος επιλογή. Ελέγξτε την αλλαγή του χρόνου." },
@@ -215,7 +224,7 @@
         ]
       },
       {
-        direct: "Είμαι πολύ χαρούμενος.",
+        direct: "❓ Είμαι πολύ χαρούμενος.",
         options: [
           { text: "Μίλησε ότι ήταν πολύ χαρούμενος.", isCorrect: true, feedback: "Σωστά! Η μετάβαση έγινε σωστά." },
           { text: "Είπε ότι είναι πολύ χαρούμενος.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει." },
@@ -224,7 +233,7 @@
         ]
       },
       {
-        direct: "Δεν μπορώ να καταλάβω.",
+        direct: "❓ Δεν μπορώ να καταλάβω.",
         options: [
           { text: "Εξήγησε ότι δεν μπορούσε να καταλάβει.", isCorrect: true, feedback: "Σωστά! Η μετάβαση από τον ενεργητικό στο παρελθόν έγινε σωστά." },
           { text: "Είπε ότι δεν μπορεί να καταλάβει.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει." },
@@ -233,7 +242,7 @@
         ]
       },
       {
-        direct: "Πρέπει να τελειώσουμε την εργασία.",
+        direct: "❓ Πρέπει να τελειώσουμε την εργασία.",
         options: [
           { text: "Τόνισε ότι έπρεπε να τελειώσουν την εργασία.", isCorrect: true, feedback: "Σωστά! Η μετάβαση σε δευτερεύουσα πρόταση έγινε σωστά." },
           { text: "Είπε ότι πρέπει να τελειώσουν την εργασία.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει σωστά." },
@@ -242,7 +251,7 @@
         ]
       },
       {
-        direct: "Έλα να δούμε τον καιρό.",
+        direct: "❓ Έλα να δούμε τον καιρό.",
         options: [
           { text: "Πρότεινε να δουν τον καιρό.", isCorrect: true, feedback: "Σωστά! Η πρόταση μετατράπηκε σωστά." },
           { text: "Είπε να δούμε τον καιρό.", isCorrect: false, feedback: "Λάθος επιλογή. Η δομή δεν αντικατοπτρίζει σωστά την πρόταση." },
@@ -251,7 +260,7 @@
         ]
       },
       {
-        direct: "Θα δούμε μια ταινία.",
+        direct: "❓ Θα δούμε μια ταινία.",
         options: [
           { text: "Ανακοίνωσε ότι θα έβλεπαν μια ταινία.", isCorrect: true, feedback: "Σωστά! Η αλλαγή του χρόνου έγινε σωστά." },
           { text: "Είπε ότι θα δούμε μια ταινία.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει σωστά." },
@@ -260,7 +269,7 @@
         ]
       },
       {
-        direct: "Σου αρέσει αυτό το βιβλίο;",
+        direct: "❓ Σου αρέσει αυτό το βιβλίο;",
         options: [
           { text: "Ρώτησε αν του άρεσε αυτό το βιβλίο.", isCorrect: true, feedback: "Σωστά! Η μετάβαση από ερώτηση σε πλάγιο λόγο έγινε σωστά." },
           { text: "Ρώτησε αν του αρέσει αυτό το βιβλίο.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει." },
@@ -269,7 +278,7 @@
         ]
       },
       {
-        direct: "Μπορώ να πάρω αυτό;",
+        direct: "❓ Μπορώ να πάρω αυτό;",
         options: [
           { text: "Ρώτησε αν μπορούσε να το πάρει.", isCorrect: true, feedback: "Σωστά! Η μετάβαση με αλλαγή προσώπου και ρήματος έγινε σωστά." },
           { text: "Είπε ότι μπορεί να το πάρει.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει μεταβληθεί σωστά." },
@@ -278,7 +287,7 @@
         ]
       },
       {
-        direct: "Αυτό είναι το δικό μου βιβλίο.",
+        direct: "❓ Αυτό είναι το δικό μου βιβλίο.",
         options: [
           { text: "Εξήγησε ότι αυτό ήταν το δικό του βιβλίο.", isCorrect: true, feedback: "Σωστά! Η αλλαγή στο προσωνύμιο έγινε σωστά." },
           { text: "Είπε ότι αυτό είναι το δικό του βιβλίο.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει." },
@@ -287,7 +296,7 @@
         ]
       },
       {
-        direct: "Θα βγούμε έξω.",
+        direct: "❓ Θα βγούμε έξω.",
         options: [
           { text: "Είπε ότι θα βγαιναν έξω.", isCorrect: true, feedback: "Σωστά! Η μετάβαση του χρόνου έγινε σωστά." },
           { text: "Είπε ότι βγαίνουμε έξω.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει σωστά." },
@@ -296,7 +305,7 @@
         ]
       },
       {
-        direct: "Κάνε την εργασία σου.",
+        direct: "❓ Κάνε την εργασία σου.",
         options: [
           { text: "Τον παρακίνησε να κάνει την εργασία του.", isCorrect: true, feedback: "Σωστά! Η εντολή μετατράπηκε σωστά." },
           { text: "Του είπε να κάνει την εργασία του.", isCorrect: false, feedback: "Λάθος επιλογή. Ελέγξτε την αλλαγή του προσώπου." },
@@ -305,7 +314,7 @@
         ]
       },
       {
-        direct: "Πάρε αυτό το τηλέφωνο.",
+        direct: "❓ Πάρε αυτό το τηλέφωνο.",
         options: [
           { text: "Της είπε να πάρει αυτό το τηλέφωνο.", isCorrect: true, feedback: "Σωστά! Η αλλαγή στο αντικείμενο έγινε σωστά." },
           { text: "Της είπε να πάρει αυτή τηλέφωνο.", isCorrect: false, feedback: "Λάθος επιλογή. Ελέγξτε το άρθρο και το αντικείμενο." },
@@ -314,7 +323,7 @@
         ]
       },
       {
-        direct: "Μην αργείς.",
+        direct: "❓ Μην αργείς.",
         options: [
           { text: "Την προειδοποίησε να μην αργεί.", isCorrect: true, feedback: "Σωστά! Η εντολή μετατράπηκε σωστά σε προειδοποίηση." },
           { text: "Της είπε να μην αργεί.", isCorrect: false, feedback: "Λάθος επιλογή. Η δομή δεν αντικατοπτρίζει πλήρως την προειδοποίηση." },
@@ -323,7 +332,7 @@
         ]
       },
       {
-        direct: "Συναντιόμαστε στις 8.",
+        direct: "❓ Συναντιόμαστε στις 8.",
         options: [
           { text: "Είπε ότι θα συναντιόντουσαν στις 8.", isCorrect: true, feedback: "Σωστά! Η αλλαγή στο ρήμα έγινε σωστά." },
           { text: "Είπε ότι συναντιόμαστε στις 8.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει." },
@@ -332,7 +341,7 @@
         ]
       },
       {
-        direct: "Αυτό το μέρος είναι όμορφο.",
+        direct: "❓ Αυτό το μέρος είναι όμορφο.",
         options: [
           { text: "Εξήγησε ότι εκείνο το μέρος ήταν όμορφο.", isCorrect: true, feedback: "Σωστά! Η μετάβαση έγινε σωστά." },
           { text: "Είπε ότι αυτό το μέρος είναι όμορφο.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει." },
@@ -341,7 +350,7 @@
         ]
       },
       {
-        direct: "Θα φέρω το φαγητό.",
+        direct: "❓ Θα φέρω το φαγητό.",
         options: [
           { text: "Υποσχέθηκε ότι θα έφερε το φαγητό.", isCorrect: true, feedback: "Σωστά! Η χρήση του μέλλοντα έχει προσαρμοστεί σωστά." },
           { text: "Είπε ότι θα φέρει το φαγητό.", isCorrect: false, feedback: "Λάθος επιλογή. Ελέγξτε την αλλαγή του χρόνου." },
@@ -350,7 +359,7 @@
         ]
       },
       {
-        direct: "Δεν ξέρω την απάντηση.",
+        direct: "❓ Δεν ξέρω την απάντηση.",
         options: [
           { text: "Έλαβε να πει ότι δεν ήξερε την απάντηση.", isCorrect: true, feedback: "Σωστά! Η μετάβαση στο παρελθόν έγινε σωστά." },
           { text: "Είπε ότι δεν ξέρει την απάντηση.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει." },
@@ -359,7 +368,7 @@
         ]
       },
       {
-        direct: "Είμαι έτοιμος.",
+        direct: "❓ Είμαι έτοιμος.",
         options: [
           { text: "Εξήγησε ότι ήταν έτοιμος.", isCorrect: true, feedback: "Σωστά! Η μετάβαση έγινε σωστά." },
           { text: "Είπε ότι είναι έτοιμος.", isCorrect: false, feedback: "Λάθος επιλογή. Ο χρόνος δεν έχει αλλάξει." },
@@ -368,7 +377,7 @@
         ]
       },
       {
-        direct: "Αυτός θα κερδίσει.",
+        direct: "❓ Αυτός θα κερδίσει.",
         options: [
           { text: "Είπε ότι εκείνος θα κέρδιζε.", isCorrect: true, feedback: "Σωστά! Η αλλαγή στο ρήμα έγινε σωστά." },
           { text: "Είπε ότι αυτός θα κερδίσει.", isCorrect: false, feedback: "Λάθος επιλογή. Ελέγξτε την αλλαγή του προσώπου." },
@@ -381,15 +390,20 @@
     let currentQuestionIndex = 0;
     let score = 0;
     const userResponses = []; // Καταγραφή απαντήσεων για ανασκόπηση
+    let currentShuffledOptions = []; // Για κάθε ερώτηση, οι επιλογές σε τυχαία σειρά
 
     // Φόρτωση της τρέχουσας ερώτησης
     function loadQuestion() {
       const questionContainer = document.getElementById('questionContainer');
       const question = questions[currentQuestionIndex];
-      let html = `<p><strong>Ευθύς λόγος:</strong> "${question.direct}"</p>`;
-      html += `<form id="optionsForm">`;
-      question.options.forEach((option, index) => {
-        html += `<label><input type="radio" name="option" value="${index}"> ${option.text}</label>`;
+      
+      // Ανακατέβουμε τις επιλογές (δημιουργώντας αντίγραφο του πίνακα)
+      currentShuffledOptions = shuffle(question.options.slice());
+      
+      let html = `<p><strong>${question.direct}</strong></p>`;
+      html += `<form id="optionsForm" class="options">`;
+      currentShuffledOptions.forEach((option, index) => {
+        html += `<label><input type="radio" name="option" value="${index}"> 👉 ${option.text}</label>`;
       });
       html += `<br><button type="button" onclick="submitAnswer()">Υποβολή</button>`;
       html += `</form>`;
@@ -405,32 +419,31 @@
       const selectedOption = optionsForm.option ? optionsForm.option.value : null;
 
       if (selectedOption === null || selectedOption === undefined) {
-        alert("Παρακαλώ επιλέξτε μια επιλογή.");
+        alert("Παρακαλώ επιλέξτε μια επιλογή. 🤔");
         return;
       }
 
-      const question = questions[currentQuestionIndex];
-      const option = question.options[selectedOption];
+      const option = currentShuffledOptions[selectedOption];
 
       // Αναπαραγωγή ήχου ανάλογα με την ορθότητα
       if(option.isCorrect) {
         new Audio('success-sound.mp3').play();
+        feedbackDiv.textContent = option.feedback + " 😃";
       } else {
         new Audio('fail-sound.mp3').play();
+        feedbackDiv.textContent = option.feedback + " 😢";
       }
 
-      // Εμφάνιση δημιουργικής ανατροφοδότησης
-      feedbackDiv.textContent = option.feedback;
       if (option.isCorrect) {
         score++;
       }
 
       // Καταγραφή απάντησης για ανασκόπηση
       userResponses.push({
-        question: question.direct,
+        question: questions[currentQuestionIndex].direct,
         selected: option.text,
         isCorrect: option.isCorrect,
-        correctAnswer: question.options.find(opt => opt.isCorrect).text,
+        correctAnswer: currentShuffledOptions.find(opt => opt.isCorrect).text,
         feedback: option.feedback
       });
 
@@ -459,7 +472,7 @@
 
     // Εμφάνιση τελικών αποτελεσμάτων και ανασκόπησης απαντήσεων
     function showResults() {
-      document.getElementById('questionContainer').innerHTML = `<h2>Τέλος Ασκήσεων!</h2><p>Το τελικό σκορ σας είναι: ${score} από ${questions.length}</p>`;
+      document.getElementById('questionContainer').innerHTML = `<h2>Τέλος Ασκήσεων!</h2><p>Το τελικό σκορ σας είναι: ${score} από ${questions.length} 😎</p>`;
       document.getElementById('nextButton').style.display = 'none';
       displayReview();
       // Αναπαραγωγή επιπλέον ήχου αν το σκορ είναι πάνω από 20
@@ -472,8 +485,8 @@
     function displayReview() {
       let reviewHTML = "";
       userResponses.forEach((response, index) => {
-        reviewHTML += `<p><strong>Ερώτηση ${index+1}:</strong> "${response.question}"<br>`;
-        reviewHTML += `Η απάντησή σας: ${response.selected} - ${response.isCorrect ? '<span style="color: lightgreen;">Σωστή</span>' : '<span style="color: red;">Λανθασμένη</span>'}<br>`;
+        reviewHTML += `<p><strong>Ερώτηση ${index+1}:</strong> ${response.question}<br>`;
+        reviewHTML += `Η απάντησή σας: ${response.selected} - ${response.isCorrect ? '<span style="color: lightgreen;">Σωστή 😃</span>' : '<span style="color: red;">Λανθασμένη 😢</span>'}<br>`;
         if (!response.isCorrect) {
           reviewHTML += `Η σωστή απάντηση: ${response.correctAnswer}<br>`;
         }
@@ -483,11 +496,11 @@
       document.getElementById('resultContainer').style.display = 'block';
     }
 
-    // Εκτύπωση σε PDF με χρήση jsPDF
+    // Εκτύπωση σε PDF με χρήση jsPDF, εκτυπώνοντας όλο το περιεχόμενο της ανασκόπησης
     function printPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      const reviewContent = document.getElementById('review').innerText;
+      const reviewContent = document.getElementById('resultContainer').innerText;
       const lines = doc.splitTextToSize(reviewContent, 180);
       doc.text(lines, 10, 10);
       doc.save('Απαντήσεις_και_Ανατροφοδότηση.pdf');
@@ -500,4 +513,3 @@
   </script>
 </body>
 </html>
-
